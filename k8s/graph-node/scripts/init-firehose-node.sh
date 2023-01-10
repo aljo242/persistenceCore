@@ -41,11 +41,10 @@ else
         curl $GENESIS_JSON_FETCH_URL -o $HOME_DIR/config/genesis.json
     fi
 
-    GENESIS_NODE_P2P="$GENESIS_NODE_ID@$GENESIS_HOST:$GENESIS_PORT_P2P"
-    echo "Node P2P: $GENESIS_NODE_P2P"
-
     # skip persistent_peers if GENESIS_NODE_DATA_RESOLUTION_METHOD is static
     if [ $GENESIS_NODE_DATA_RESOLUTION_METHOD = "DYNAMIC" ]; then
+        GENESIS_NODE_P2P="$GENESIS_NODE_ID@$GENESIS_HOST:$GENESIS_PORT_P2P"
+        echo "Node P2P: $GENESIS_NODE_P2P"
         sed -i "s/persistent_peers = \"\"/persistent_peers = \"$GENESIS_NODE_P2P\"/g" $HOME_DIR/config/config.toml
     fi
     sed -i 's#"tcp://127.0.0.1:26657"#"tcp://0.0.0.0:26657"#g' $HOME_DIR/config/config.toml
@@ -58,17 +57,17 @@ else
         sed -i "s/seeds = \"\"/seeds = \"$SEEDS\"/g" $HOME_DIR/config/config.toml
     fi
 
-    echo "Printing the whole config.toml file"
-
+    echo "Adding extractor options in config.toml"
     cat << END >> $HOME_DIR/config/config.toml
-        #######################################################
-        ###       Extractor Configuration Options     ###
-        #######################################################
-        [extractor]
-        enabled = true
-        output_file = "stdout"
+#######################################################
+###       Extractor Configuration Options     ###
+#######################################################
+[extractor]
+enabled = true
+output_file = "stdout"
 END
-    
+
+    echo "Printing the whole config.toml file"
     cat $HOME_DIR/config/config.toml
 fi
 
