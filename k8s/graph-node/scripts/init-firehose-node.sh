@@ -69,27 +69,23 @@ END
 
     echo "Printing the whole config.toml file"
     cat $HOME_DIR/config/config.toml
-fi
 
+    echo "Setting up pruning configuration in app.toml"
+    sed -i 's/pruning = "default"/pruning = "custom"/g' $HOME_DIR/config/app.toml
+    sed -i 's/pruning-interval = "0"/pruning-interval = "10"/g' $HOME_DIR/config/app.toml
+    sed -i 's/pruning-keep-recent = "0"/pruning-keep-recent = "100"/g' $HOME_DIR/config/app.toml
 
+    echo "Printing app.toml"
+    cat $HOME_DIR/config/app.toml
 
-# if STATE_RESTORE_SNAPSHOT_URL is not empty url and wasm folder doesn't exist, then download and extract the snapshot
-if [ ! -z "$STATE_RESTORE_SNAPSHOT_URL" ]; then
-    # also verify that wasm folder is not empty, if it is empty only then download the snapshot
-    if [ ! -d "$HOME_DIR/wasm" ] || [ ! "$(ls -A $HOME_DIR/wasm)" ]; then
+    # Restore snapshot if url is present
+    if [ ! -z "$STATE_RESTORE_SNAPSHOT_URL" ]; then
         echo "Downloading snapshot from $STATE_RESTORE_SNAPSHOT_URL"
-        curl $STATE_RESTORE_SNAPSHOT_URL -o $HOME_DIR/snapshot.tar.gz
+        wget -O $HOME_DIR/snapshot.tar.gz $STATE_RESTORE_SNAPSHOT_URL
+
         echo "Extracting snapshot"
         tar -xvf $HOME_DIR/snapshot.tar.gz -C $HOME_DIR
         rm -rf $HOME_DIR/snapshot.tar.gz
-
-        # Move wasm and data folder out of `temp-testnet-snap` folder with force write 
-        echo "Restoring state from snapshot"
-        ls -lrht $HOME_DIR/temp-testnet-snap
-        mv -f $HOME_DIR/temp-testnet-snap/wasm $HOME_DIR
-        mv -f $HOME_DIR/temp-testnet-snap/data $HOME_DIR
-    else
-        echo "Wasm folder already exists, skipping snapshot download"
     fi
 fi
 
